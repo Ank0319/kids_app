@@ -1,0 +1,218 @@
+# 观看历史API使用指南
+
+
+
+## 1. 记录/更新观看历史
+
+### 记录新的观看历史
+- **URL**: `/api/watch-history`
+- **方法**: POST
+- **请求体**:
+```json
+{
+  "userId": 1,
+  "videoId": 2,
+  "progress": 120
+}
+```
+- **说明**: 
+  - 如果用户之前未观看过该视频，创建新记录
+  - 如果已观看过，则更新记录并刷新观看时间
+- **响应示例**:
+```json
+{
+  "code": 200,
+  "message": "观看历史记录成功",
+  "data": {
+    "id": 1,
+    "userId": 1,
+    "videoId": 2,
+    "watchedAt": "2024-04-01T16:30:00",
+    "progress": 120
+  },
+  "timestamp": "2024-04-01T16:30:00"
+}
+```
+
+### 更新视频观看进度
+- **URL**: `/api/watch-history/users/{userId}/videos/{videoId}/progress`
+- **方法**: PUT
+- **参数**:
+  - `userId`: 用户ID
+  - `videoId`: 视频ID
+- **请求体**:
+```json
+{
+  "progress": 150
+}
+```
+- **响应示例**:
+```json
+{
+  "code": 200,
+  "message": "观看进度更新成功",
+  "data": {
+    "id": 1,
+    "userId": 1,
+    "videoId": 2,
+    "watchedAt": "2024-04-01T16:35:00",
+    "progress": 150
+  },
+  "timestamp": "2024-04-01T16:35:00"
+}
+```
+
+## 2. 获取观看历史
+
+### 获取用户的所有观看历史(带视频信息)
+- **URL**: `/api/watch-history/users/{userId}`
+- **方法**: GET
+- **参数**:
+  - `userId`: 用户ID
+- **响应示例**:
+```json
+{
+  "code": 200,
+  "message": "success",
+  "data": [
+    {
+      "id": 1,
+      "userId": 1,
+      "videoId": 2,
+      "watchedAt": "2024-04-01T16:35:00",
+      "progress": 150,
+      "videoTitle": "Spring Boot教程",
+      "videoDescription": "Spring Boot入门到精通",
+      "videoThumbnailUrl": "https://example.com/thumbnails/spring.jpg",
+      "videoDuration": 600,
+      "videoType": "learning"
+    },
+    {
+      "id": 2,
+      "userId": 1,
+      "videoId": 3,
+      "watchedAt": "2024-04-01T15:20:00",
+      "progress": 80,
+      "videoTitle": "Java编程基础",
+      "videoDescription": "Java入门教程",
+      "videoThumbnailUrl": "https://example.com/thumbnails/java.jpg",
+      "videoDuration": 480,
+      "videoType": "learning"
+    }
+  ],
+  "timestamp": "2024-04-01T16:40:00"
+}
+```
+
+### 分页获取用户观看历史
+- **URL**: `/api/watch-history/users/{userId}/page`
+- **方法**: GET
+- **参数**:
+  - `userId`: 用户ID
+  - `page`: 页码（可选，默认0）
+  - `size`: 每页数量（可选，默认10）
+- **响应格式**: 与上面类似，但包含分页信息
+
+### 获取用户最近的观看历史
+- **URL**: `/api/watch-history/users/{userId}/recent`
+- **方法**: GET
+- **参数**:
+  - `userId`: 用户ID
+- **说明**: 返回用户最近7天的观看历史
+- **响应格式**: 与获取所有历史类似
+
+## 3. 查询具体历史记录
+
+### 获取观看历史详情
+- **URL**: `/api/watch-history/{id}`
+- **方法**: GET
+- **参数**:
+  - `id`: 观看历史记录ID
+
+### 检查用户是否观看过视频
+- **URL**: `/api/watch-history/users/{userId}/videos/{videoId}/check`
+- **方法**: GET
+- **参数**:
+  - `userId`: 用户ID
+  - `videoId`: 视频ID
+- **响应示例**:
+```json
+{
+  "code": 200,
+  "message": "success",
+  "data": true,
+  "timestamp": "2024-04-01T16:45:00"
+}
+```
+
+### 获取用户观看视频的进度
+- **URL**: `/api/watch-history/users/{userId}/videos/{videoId}/progress`
+- **方法**: GET
+- **参数**:
+  - `userId`: 用户ID
+  - `videoId`: 视频ID
+- **响应示例**:
+```json
+{
+  "code": 200,
+  "message": "success",
+  "data": 150,
+  "timestamp": "2024-04-01T16:50:00"
+}
+```
+
+## 4. 管理观看历史
+
+### 删除特定观看记录
+- **URL**: `/api/watch-history/{id}`
+- **方法**: DELETE
+- **参数**:
+  - `id`: 观看历史记录ID
+
+### 删除用户观看特定视频的历史
+- **URL**: `/api/watch-history/users/{userId}/videos/{videoId}`
+- **方法**: DELETE
+- **参数**:
+  - `userId`: 用户ID
+  - `videoId`: 视频ID
+
+### 获取用户观看的不同视频数量
+- **URL**: `/api/watch-history/users/{userId}/count`
+- **方法**: GET
+- **参数**:
+  - `userId`: 用户ID
+- **响应示例**:
+```json
+{
+  "code": 200,
+  "message": "success",
+  "data": 5,
+  "timestamp": "2024-04-01T16:55:00"
+}
+```
+
+## 使用说明
+
+1. **记录观看历史**: 当用户开始观看视频时，使用POST接口记录观看历史，包含用户ID、视频ID和初始进度；
+
+2. **更新观看进度**: 在用户观看过程中，定期使用PUT接口更新观看进度，确保用户下次可以从上次的位置继续观看；
+
+3. **展示观看历史**: 在用户的个人中心展示最近观看的视频列表，使用GET接口获取带有视频信息的观看历史；
+
+4. **断点续播**: 用户再次访问视频时，使用GET接口获取上次的观看进度，实现断点续播功能；
+
+5. **观看状态显示**: 在视频列表或详情页面，使用检查API判断用户是否观看过视频，可以显示"已观看"或"继续观看"的状态。
+
+## 特点和优势
+
+1. **自动更新时间**: 每次更新观看进度时，系统会自动更新观看时间，方便按最近观看时间排序；
+
+2. **完整的视频信息**: 获取观看历史时包含了视频的标题、描述、缩略图等信息，方便前端直接展示；
+
+3. **灵活的查询接口**: 提供了多种查询方式，包括分页查询、最近观看和特定视频的观看记录；
+
+4. **进度管理**: 支持记录和查询视频的观看进度，方便实现断点续播功能；
+
+5. **统计功能**: 提供了统计用户观看不同视频数量的接口，可用于数据分析和用户行为跟踪。
+
+以上API已完整实现了视频观看历史的记录、查询和管理功能，可以满足视频应用中与观看历史相关的各种需求。

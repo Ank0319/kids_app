@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Base color -->
+    <item>
+        <shape android:shape="rectangle">
+            <solid android:color="#FFF8E1" />
+        </shape>
+    </item>
+    
+    <!-- Decorative dots pattern -->
+    <item>
+        <bitmap
+            android:src="@android:drawable/divider_horizontal_bright"
+            android:tileMode="repeat"
+            android:gravity="top"
+            android:alpha="0.1" />
+    </item>
+    
+    <!-- Gradient overlay for softness -->
+    <item>
+        <shape android:shape="rectangle">
+            <gradient
+                android:angle="90"
+                android:startColor="#10FFC107"
+                android:endColor="#10FFEB3B"
+                android:type="linear" />
+        </shape>
+    </item>
+</layer-list> 
