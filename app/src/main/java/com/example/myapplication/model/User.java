@@ -11,6 +11,12 @@ public class User {
 
     @SerializedName("password")
     private String password;
+    
+    @SerializedName("email")
+    private String email;
+    
+    @SerializedName("verificationCode")
+    private String verificationCode;
 
     @SerializedName("avatarUrl")
     private String avatarUrl;
@@ -20,6 +26,9 @@ public class User {
     
     @SerializedName("signature")
     private String signature;
+
+    @SerializedName("backgroundUrl")
+    private String backgroundUrl;
 
     @SerializedName("createTime")
     private String createdAt;
@@ -51,6 +60,22 @@ public class User {
     public void setPassword(String password) {
         this.password = password;
     }
+    
+    public String getEmail() {
+        return email;
+    }
+    
+    public void setEmail(String email) {
+        this.email = email;
+    }
+    
+    public String getVerificationCode() {
+        return verificationCode;
+    }
+    
+    public void setVerificationCode(String verificationCode) {
+        this.verificationCode = verificationCode;
+    }
 
     public String getAvatarUrl() {
         return avatarUrl;
@@ -74,6 +99,14 @@ public class User {
     
     public void setSignature(String signature) {
         this.signature = signature;
+    }
+
+    public String getBackgroundUrl() {
+        return backgroundUrl;
+    }
+
+    public void setBackgroundUrl(String backgroundUrl) {
+        this.backgroundUrl = backgroundUrl;
     }
 
     public String getCreatedAt() {

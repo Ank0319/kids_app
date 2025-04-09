@@ -21,7 +21,7 @@ public class UserViewModel extends ViewModel {
     }
     
     // 设置当前用户数据
-    public void setCurrentUser(User user) {
+    public void setUser(User user) {
         currentUser.setValue(user);
         isLoggedIn.setValue(user != null);
     }

@@ -20,7 +20,7 @@ import java.util.List;
 public class VideoAdapter extends RecyclerView.Adapter<VideoAdapter.VideoViewHolder> {
     private List<Video> videos;
     private OnVideoClickListener listener;
-    private static final String API_BASE_URL = "http://192.168.50.221:8080/";
+    private static final String API_BASE_URL = "http://192.168.32.221:8080/";
     private static final String VIDEO_BASE_URL = "https://kids-vedio.oss-cn-beijing.aliyuncs.com/";
 
     public interface OnVideoClickListener {

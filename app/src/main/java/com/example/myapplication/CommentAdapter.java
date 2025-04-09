@@ -27,7 +27,7 @@ import java.util.Locale;
 public class CommentAdapter extends RecyclerView.Adapter<CommentAdapter.CommentViewHolder> {
     private Context context;
     private List<Comment> commentList;
-    private static final String API_BASE_URL = "http://192.168.19.221:8080/";
+    private static final String API_BASE_URL = "http://192.168.32.221:8080/";
     private static final SimpleDateFormat INPUT_FORMAT = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.getDefault());
     private static final SimpleDateFormat OUTPUT_FORMAT = new SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault());
 

@@ -227,7 +227,7 @@ public class ProfileFragment extends Fragment {
         });
         
         registerOption.setOnClickListener(v -> {
-            Toast.makeText(getContext(), "注册功能暂未实现", Toast.LENGTH_SHORT).show();
+            navigateToRegister();
             popupWindow.dismiss();
         });
         
@@ -282,6 +282,11 @@ public class ProfileFragment extends Fragment {
         Toast.makeText(getContext(), "已退出登录", Toast.LENGTH_SHORT).show();
     }
     
+    private void navigateToRegister() {
+        Intent intent = new Intent(getActivity(), RegisterActivity.class);
+        startActivity(intent);
+    }
+    
     private void updateLoginState() {
         if (isLogin) {
             // 已登录状态
@@ -302,47 +307,53 @@ public class ProfileFragment extends Fragment {
     }
     
     private void loadUserData() {
-        // 从SharedPreferences加载用户数据
-        String userIdStr = sharedPreferences.getString("user_id", "0");
-        long userId = 0;
-        try {
-            userId = Long.parseLong(userIdStr);
-        } catch (NumberFormatException e) {
-            // 忽略转换错误，使用默认值0
-        }
+        // 从SharedPreferences加载用户信息
+        SharedPreferences sp = requireActivity().getSharedPreferences("user_info", Context.MODE_PRIVATE);
+        String userId = sp.getString("user_id", "0");
+        String username = sp.getString("username", "");
+        String nickname = sp.getString("nickname", "");
+        String avatarUrl = sp.getString("avatarUrl", "");
+        String signature = sp.getString("signature", "");
+        String backgroundUrl = sp.getString("backgroundUrl", "");
         
-        String username = sharedPreferences.getString("username", "未知用户");
-        String nickname = sharedPreferences.getString("nickname", username);
-        String avatarUrl = sharedPreferences.getString("avatarUrl", "");
-        String signature = sharedPreferences.getString("signature", "这个人很懒，什么都没留下");
-        
-        // 更新UI：使用nickname作为用户名，username作为账号ID
-        userName.setText(nickname);
+        // 更新UI显示
+        userName.setText(nickname.isEmpty() ? getString(R.string.default_username) : nickname);
         accountId.setText(username);
         ipLocation.setText("中国");  // 实际应用中可能需要从服务器获取
-        userBio.setText(signature);
+        userBio.setText(signature.isEmpty() ? getString(R.string.default_bio) : signature);
         
-        // 使用Glide加载头像
-        if (!TextUtils.isEmpty(avatarUrl)) {
+        // 加载头像
+        if (avatarUrl.isEmpty()) {
+            profileAvatar.setImageResource(R.drawable.avatar);
+        } else {
             Glide.with(this)
                 .load(avatarUrl)
-                .placeholder(R.drawable.avatar) // 加载中显示的占位图
-                .error(R.drawable.avatar) // 加载失败显示的图片
-                .circleCrop() // 圆形裁剪
+                .placeholder(R.drawable.avatar)
+                .error(R.drawable.avatar)
+                .circleCrop()
                 .into(profileAvatar);
-        } else {
-            // 如果没有头像URL，使用默认头像
-            profileAvatar.setImageResource(R.drawable.avatar);
         }
         
-        // 创建用户对象并设置到ViewModel
+        // 加载背景图
+        if (backgroundUrl.isEmpty()) {
+            profileBackground.setImageResource(R.drawable.background);
+        } else {
+            Glide.with(this)
+                .load(backgroundUrl)
+                .placeholder(R.drawable.background)
+                .error(R.drawable.background)
+                .into(profileBackground);
+        }
+        
+        // 更新ViewModel中的用户数据
         User user = new User();
-        user.setId(userId);
+        user.setId(Long.parseLong(userId));
         user.setUsername(username);
-        user.setNickname(nickname);
-        user.setAvatarUrl(avatarUrl);
-        user.setSignature(signature);
-        userViewModel.setCurrentUser(user);
+        user.setNickname(nickname.isEmpty() ? getString(R.string.default_username) : nickname);
+        user.setSignature(signature.isEmpty() ? getString(R.string.default_bio) : signature);
+        user.setAvatarUrl(avatarUrl.isEmpty() ? String.valueOf(R.drawable.avatar) : avatarUrl);
+        user.setBackgroundUrl(backgroundUrl.isEmpty() ? String.valueOf(R.drawable.background) : backgroundUrl);
+        userViewModel.setUser(user);
     }
     
     @Override

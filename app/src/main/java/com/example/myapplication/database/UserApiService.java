@@ -1,7 +1,9 @@
 package com.example.myapplication.database;
 
 import com.example.myapplication.model.ApiResponse;
+import com.example.myapplication.model.LoginRequest;
 import com.example.myapplication.model.User;
+import com.example.myapplication.model.PasswordChangeRequest;
 
 import java.util.List;
 
@@ -67,9 +69,17 @@ public interface UserApiService {
     
     /**
      * 用户登录
-     * @param user 用户登录信息（用户名和密码）
+     * @param loginRequest 登录请求信息（包含account和password）
      * @return 登录成功的用户信息
      */
-    @POST("api/users/login")
-    Call<ApiResponse<User>> login(@Body User user);
+    @POST("api/auth/login")
+    Call<ApiResponse<User>> login(@Body LoginRequest loginRequest);
+    
+    /**
+     * 修改密码
+     * @param request 密码修改请求信息
+     * @return API响应
+     */
+    @POST("api/auth/change-password")
+    Call<ApiResponse<Void>> changePassword(@Body PasswordChangeRequest request);
 } 

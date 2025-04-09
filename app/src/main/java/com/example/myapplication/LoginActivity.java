@@ -17,6 +17,7 @@ import android.widget.Toast;
 import com.example.myapplication.database.ApiClient;
 import com.example.myapplication.database.UserApiService;
 import com.example.myapplication.model.ApiResponse;
+import com.example.myapplication.model.LoginRequest;
 import com.example.myapplication.model.User;
 
 import retrofit2.Call;
@@ -87,8 +88,9 @@ public class LoginActivity extends AppCompatActivity {
         tvForgotPassword.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                // TODO: 跳转到忘记密码页面
-                Toast.makeText(LoginActivity.this, "忘记密码功能暂未实现", Toast.LENGTH_SHORT).show();
+                // 跳转到忘记密码页面
+                Intent intent = new Intent(LoginActivity.this, ForgotPasswordActivity.class);
+                startActivity(intent);
             }
         });
     }
@@ -99,7 +101,7 @@ public class LoginActivity extends AppCompatActivity {
         etPassword.setError(null);
         
         // 获取输入值
-        String username = etUsername.getText().toString().trim();
+        String account = etUsername.getText().toString().trim();
         String password = etPassword.getText().toString().trim();
         
         // 验证输入
@@ -113,9 +115,9 @@ public class LoginActivity extends AppCompatActivity {
             cancel = true;
         }
         
-        // 检查用户名
-        if (TextUtils.isEmpty(username)) {
-            etUsername.setError("请输入用户名");
+        // 检查用户名/邮箱
+        if (TextUtils.isEmpty(account)) {
+            etUsername.setError("请输入用户名或邮箱");
             focusView = etUsername;
             cancel = true;
         }
@@ -127,13 +129,11 @@ public class LoginActivity extends AppCompatActivity {
             // 显示进度对话框
             progressDialog.show();
             
-            // 创建用户对象用于登录
-            User loginUser = new User();
-            loginUser.setUsername(username);
-            loginUser.setPassword(password);
+            // 创建登录请求对象
+            LoginRequest loginRequest = new LoginRequest(account, password);
             
             // 执行登录请求
-            userApiService.login(loginUser).enqueue(new Callback<ApiResponse<User>>() {
+            userApiService.login(loginRequest).enqueue(new Callback<ApiResponse<User>>() {
                 @Override
                 public void onResponse(Call<ApiResponse<User>> call, Response<ApiResponse<User>> response) {
                     progressDialog.dismiss();
@@ -156,12 +156,39 @@ public class LoginActivity extends AppCompatActivity {
                             finish();
                         } else {
                             // 登录失败
-                            Toast.makeText(LoginActivity.this, 
-                                apiResponse.getMessage() != null ? apiResponse.getMessage() : "登录失败", 
-                                Toast.LENGTH_SHORT).show();
+                            String errorMessage = apiResponse.getMessage();
+                            if (errorMessage != null && errorMessage.contains("用户名或密码错误")) {
+                                etPassword.setError("用户名或密码错误");
+                                etPassword.requestFocus();
+                            } else {
+                                Toast.makeText(LoginActivity.this, 
+                                    errorMessage != null ? errorMessage : "登录失败", 
+                                    Toast.LENGTH_SHORT).show();
+                            }
                         }
                     } else {
                         // API调用失败
+                        try {
+                            if (response.errorBody() != null) {
+                                String errorBody = response.errorBody().string();
+                                Log.e(TAG, "登录失败响应: " + errorBody);
+                                
+                                // 尝试解析错误响应
+                                ApiResponse<?> errorResponse = new com.google.gson.Gson().fromJson(
+                                        errorBody, ApiResponse.class);
+                                if (errorResponse != null && errorResponse.getMessage() != null) {
+                                    String errorMessage = errorResponse.getMessage();
+                                    if (errorMessage.contains("用户名或密码错误")) {
+                                        etPassword.setError("用户名或密码错误");
+                                        etPassword.requestFocus();
+                                        return;
+                                    }
+                                }
+                            }
+                        } catch (Exception e) {
+                            Log.e(TAG, "解析错误响应失败", e);
+                        }
+                        
                         Toast.makeText(LoginActivity.this, "登录失败: " + response.code(), Toast.LENGTH_SHORT).show();
                     }
                 }
@@ -170,7 +197,16 @@ public class LoginActivity extends AppCompatActivity {
                 public void onFailure(Call<ApiResponse<User>> call, Throwable t) {
                     progressDialog.dismiss();
                     Log.e(TAG, "登录失败", t);
-                    Toast.makeText(LoginActivity.this, "网络错误，请检查网络连接", Toast.LENGTH_SHORT).show();
+                    
+                    if (t instanceof java.net.SocketTimeoutException) {
+                        Toast.makeText(LoginActivity.this, "服务器响应超时，请稍后重试", Toast.LENGTH_SHORT).show();
+                    } else if (t instanceof java.net.ConnectException) {
+                        Toast.makeText(LoginActivity.this, "无法连接到服务器，请检查网络设置", Toast.LENGTH_SHORT).show();
+                    } else if (t instanceof java.net.UnknownHostException) {
+                        Toast.makeText(LoginActivity.this, "无法解析服务器地址，请检查网络连接", Toast.LENGTH_SHORT).show();
+                    } else {
+                        Toast.makeText(LoginActivity.this, "网络错误，请检查网络连接", Toast.LENGTH_SHORT).show();
+                    }
                 }
             });
         }
@@ -186,6 +222,7 @@ public class LoginActivity extends AppCompatActivity {
         editor.putString("nickname", user.getNickname() != null ? user.getNickname() : user.getUsername());
         editor.putString("avatarUrl", user.getAvatarUrl());
         editor.putString("signature", user.getSignature() != null ? user.getSignature() : "这个人很懒，什么都没留下");
+        editor.putString("backgroundUrl", user.getBackgroundUrl());
         editor.putBoolean("is_login", true);
         
         // 确保所有数据都成功提交
@@ -195,6 +232,7 @@ public class LoginActivity extends AppCompatActivity {
                + ", 用户名=" + user.getUsername()
                + ", 昵称=" + user.getNickname()
                + ", 个性签名=" + user.getSignature()
-               + ", 头像URL=" + user.getAvatarUrl());
+               + ", 头像URL=" + user.getAvatarUrl()
+               + ", 背景URL=" + user.getBackgroundUrl());
     }
 } 
